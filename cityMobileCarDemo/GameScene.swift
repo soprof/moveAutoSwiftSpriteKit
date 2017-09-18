@@ -10,18 +10,16 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
-    
-    private var label : SKLabelNode?
+    let player = SKSpriteNode(imageNamed: "car")
     private var spinnyNode : SKShapeNode?
     
     override func didMove(to view: SKView) {
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
+        player.position = CGPoint(x: 150, y: 150)
+        player.scale(to: CGSize(width: 200, height: 100))
+        player.physicsBody = SKPhysicsBody(rectangleOf: player.size)
+        player.physicsBody?.affectedByGravity = false
+        addChild(player)
         
         // Create shape node to use during mouse interaction
         let w = (self.size.width + self.size.height) * 0.05
@@ -52,6 +50,13 @@ class GameScene: SKScene {
             n.strokeColor = SKColor.blue
             self.addChild(n)
         }
+        let v1 = CGVector(dx:0, dy:0)
+        let v2 = CGVector(dx:pos.x - player.position.x, dy: pos.y - player.position.y)
+        let angle = atan2(v2.dy, v2.dx) - atan2(v1.dy, v1.dx)
+        
+        player.run(SKAction.rotate(toAngle: angle, duration: 0.25)) {
+            self.player.run(SKAction.move(to: pos, duration: 1.0))
+        }
     }
     
     func touchUp(atPoint pos : CGPoint) {
@@ -63,10 +68,6 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
-        
         for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
     
